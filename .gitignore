@@ -1,0 +1,6 @@
+# Anchored with a leading slash on purpose. A BARE entry in .gitignore matches
+# DIRECTORIES as well as files, so an unanchored `pulse` would silently hide a
+# cmd/pulse/ package — which is exactly how a Go package went missing in this
+# estate once already. git status does not warn you.
+/dist/
+/coverage.out

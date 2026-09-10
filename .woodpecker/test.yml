@@ -1,0 +1,38 @@
+# Routes to the in-cluster Kubernetes agent, which advertises `!runner=k8s` — a
+# MANDATORY label, so an agent is only eligible when a task asks for it.
+labels:
+  runner: k8s
+
+# Both events, deliberately. A pipeline gated on `pull_request` alone verifies
+# every PROPOSAL and never the ARTICLE — a direct push to main would land
+# unverified, which is how nine of warden's twelve gates never once ran against
+# what deployed.
+when:
+  - event: push
+    branch: main
+  - event: pull_request
+
+steps:
+  unit:
+    image: golang:1.25
+    # Resources are REQUIRED. Without them the step pod is QoS class BestEffort,
+    # the first thing evicted under node memory pressure — and it dies during
+    # `go: downloading`, producing a log with zero `=== RUN` lines that reads
+    # exactly like a real test failure.
+    backend_options:
+      kubernetes:
+        resources:
+          requests: { memory: 1Gi, cpu: 500m }
+          limits: { memory: 3Gi }
+    commands:
+      - test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
+      - go vet ./...
+      # * -race because the retry path uses a timer and a context, and a data
+      # * race there surfaces as an intermittent failure rather than as
+      # * anything a reader would notice.
+      - go test -race ./...
+      # * This module is imported by pulse-cli and pulse-mcp. A dependency added
+      # * here lands in both binaries, so the direct-dependency count is pinned:
+      # * pulse-api-go (wire types) and go-keyring (the credential store), and
+      # * nothing else without a deliberate change to this line.
+      - 'test "$(go list -m -f "{{if not .Indirect}}{{.Path}}{{end}}" all | grep -c .)" -eq 3'
