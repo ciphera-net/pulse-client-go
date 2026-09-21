@@ -21,7 +21,7 @@ import (
 // somebody else can also give.
 const DefaultBaseURL = "https://pulse-api.ciphera.net/api/public/v1"
 
-// Client talks to the Pulse public read API.
+// Client talks to the Pulse Analytics public read API.
 type Client struct {
 	BaseURL   string
 	APIKey    string

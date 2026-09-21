@@ -1,6 +1,6 @@
 # pulse-client-go
 
-The Go client for the [Pulse](https://ciphera.net/products/pulse) public read API, plus the
+The Go client for the [Pulse Analytics](https://ciphera.net/products/pulse) public read API, plus the
 credential store the Pulse CLI uses.
 
 ```

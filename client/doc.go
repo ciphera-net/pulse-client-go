@@ -1,4 +1,4 @@
-// Package client talks to the Pulse public read API.
+// Package client talks to the Pulse Analytics public read API.
 //
 // The API is aggregates-only and read-only: it answers questions about
 // populations and refuses to answer questions about people. Two consequences
