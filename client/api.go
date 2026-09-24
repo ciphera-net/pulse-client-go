@@ -50,6 +50,61 @@ func Stats(ctx context.Context, c *Client, siteID string, r Range, filters []Fil
 	return Get[publicv1.Stats](ctx, c, "/sites/"+siteID+"/stats", q)
 }
 
+// Breakdown ranks a site's traffic over a range by one dimension.
+//
+// limit is the top-N row count: 0 means "use the server default" (20) and
+// omits the parameter entirely, so a caller who never thinks about limit gets
+// whatever the API would have chosen anyway rather than a client-invented
+// number that can drift from the server's own default. 1..100 otherwise,
+// checked here rather than left to a round trip.
+//
+// Unlike Stats, this endpoint has NO privacy floor (owner ruling,
+// 24-09-2026): every row comes back with its real counts, including rows
+// below five visitors, and res.Meta.Suppressed is always false here — see
+// CheckBreakdownDimension for the dimension allowlist this validates first.
+func Breakdown(ctx context.Context, c *Client, siteID, dimension string, r Range, filters []Filter, limit int) (*Result[publicv1.Breakdown], error) {
+	if err := CheckBreakdownDimension(dimension); err != nil {
+		return nil, err
+	}
+	if limit != 0 && (limit < 1 || limit > 100) {
+		return nil, fmt.Errorf("limit must be between 1 and 100 (got %d)", limit)
+	}
+
+	q := url.Values{}
+	q.Set("dimension", dimension)
+	if err := r.apply(q); err != nil {
+		return nil, err
+	}
+	if err := applyFilters(q, filters); err != nil {
+		return nil, err
+	}
+	if limit > 0 {
+		q.Set("limit", fmt.Sprintf("%d", limit))
+	}
+	return Get[publicv1.Breakdown](ctx, c, "/sites/"+siteID+"/breakdown", q)
+}
+
+// CheckBreakdownDimension enforces the breakdown endpoint's dimension
+// allowlist before a request is spent, the same way CheckFilterDimensions
+// enforces the filter cap.
+//
+// Checked against publicv1.BreakdownDimensions() directly rather than a local
+// copy of it: unlike FilterDimensions above, which the public surface
+// deliberately narrows below the internal dashboard's list, the groupable set
+// here IS the wire contract's own allowlist — there is nothing for a second
+// copy to drift from, only a chance to fall out of sync with an addition.
+func CheckBreakdownDimension(dimension string) error {
+	dims := publicv1.BreakdownDimensions()
+	for _, known := range dims {
+		if known == dimension {
+			return nil
+		}
+	}
+	return fmt.Errorf("unknown breakdown dimension %q\n\nsupported: %s\n\n"+
+		"city, timezone, screen_resolution, utm_term and utm_content are filterable but not groupable",
+		dimension, strings.Join(dims, ", "))
+}
+
 // Realtime is the live view.
 //
 // It takes no filters and never will: a filtered five-minute window describes

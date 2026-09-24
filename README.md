@@ -11,7 +11,7 @@ Two packages:
 
 | Package | What it does |
 |---|---|
-| `client` | Talks to `https://pulse-api.ciphera.net/api/public/v1` — sites, stats, realtime, bulk exports. Retries, quota headers, typed errors. |
+| `client` | Talks to `https://pulse-api.ciphera.net/api/public/v1` — sites, stats, breakdowns, realtime, bulk exports. Retries, quota headers, typed errors. |
 | `credentials` | Reads and writes the API key in the OS keychain, with a `PULSE_API_KEY` override. |
 
 Wire types come from [`pulse-api-go`](https://github.com/ciphera-net/pulse-api-go), which the
@@ -35,6 +35,35 @@ if err != nil {
 
 `siteID` is a **UUID**, from `client.Sites`. Slugs and domains are user-editable and never belong
 in a URL — a stored command would break the day somebody renames a site.
+
+## Ranking a dimension
+
+`client.Breakdown` is the top-N view behind `/sites/{id}/breakdown` — a site's traffic grouped by
+one dimension and ranked largest first:
+
+```go
+res, err := client.Breakdown(ctx, c, siteID, "country", r, nil, 0) // limit=0: server default (20)
+if err != nil {
+    return err
+}
+for _, row := range res.Data.Rows {
+    fmt.Println(row.Value, row.Visitors, row.Pageviews)
+}
+```
+
+`dimension` is validated locally against `publicv1.BreakdownDimensions()` before a request is
+spent — `client.CheckBreakdownDimension` is the same check, exported so a caller can validate a
+flag value up front. `city`, `timezone`, `screen_resolution`, `utm_term` and `utm_content` are
+filterable on `/stats` but **not** groupable here; they refuse locally with a message naming what
+is. `limit` is `0` for "use the server default" (never sent on the wire) or `1..100`, also
+checked before the request.
+
+Region rows carry a `Country` alongside `Value`, because a region name alone is ambiguous —
+`"Limburg"` is a province of both Belgium and the Netherlands.
+
+**This endpoint has no privacy floor** (owner ruling, 24-09-2026): every row comes back with its
+real counts, including rows with fewer than five visitors, and `res.Meta.Suppressed` is always
+`false` here. `/stats` and the two exports keep theirs — see below.
 
 ## Two things that will bite you if you skip them
 
