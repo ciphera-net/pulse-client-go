@@ -31,8 +31,10 @@ steps:
       # * race there surfaces as an intermittent failure rather than as
       # * anything a reader would notice.
       - go test -race ./...
-      # * This module is imported by pulse-cli and pulse-mcp. A dependency added
-      # * here lands in both binaries, so the direct-dependency count is pinned:
-      # * pulse-api-go (wire types) and go-keyring (the credential store), and
-      # * nothing else without a deliberate change to this line.
+      # * This module is imported by pulse-cli. (There is no pulse-mcp — the
+      # * MCP server lives in-process in pulse-backend and does not import this
+      # * client.) A dependency added here lands in that binary, so the
+      # * direct-dependency count is pinned: pulse-api-go (wire types) and
+      # * go-keyring (the credential store), and nothing else without a
+      # * deliberate change to this line.
       - 'test "$(go list -m -f "{{if not .Indirect}}{{.Path}}{{end}}" all | grep -c .)" -eq 3'

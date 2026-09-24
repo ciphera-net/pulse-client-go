@@ -1,5 +1,5 @@
-github.com/ciphera-net/pulse-api-go v0.1.0 h1:7kEmILF7vy3EgKf6/3noDM+1tiS+GBFaAZB6Ni4Dm6Y=
-github.com/ciphera-net/pulse-api-go v0.1.0/go.mod h1:vKHBznvyOJsj3H32rNFgoGOSYWHUSd/ND30DDn+FoZw=
+github.com/ciphera-net/pulse-api-go v0.2.0 h1:q2eBmoQ45OHGR3B1rB5ahpmb+pbnrXUgaJ6FLLh5fls=
+github.com/ciphera-net/pulse-api-go v0.2.0/go.mod h1:vKHBznvyOJsj3H32rNFgoGOSYWHUSd/ND30DDn+FoZw=
 github.com/danieljoos/wincred v1.2.3 h1:v7dZC2x32Ut3nEfRH+vhoZGvN72+dQ/snVXo/vMFLdQ=
 github.com/danieljoos/wincred v1.2.3/go.mod h1:6qqX0WNrS4RzPZ1tnroDzq9kY3fu1KwE7MRLQK4X0bs=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

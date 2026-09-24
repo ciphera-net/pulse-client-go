@@ -3,7 +3,7 @@ module github.com/ciphera-net/pulse-client-go
 go 1.25.5
 
 require (
-	github.com/ciphera-net/pulse-api-go v0.1.0
+	github.com/ciphera-net/pulse-api-go v0.2.0
 	github.com/zalando/go-keyring v0.2.8
 )
 
