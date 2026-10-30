@@ -14,7 +14,7 @@ when:
 
 steps:
   unit:
-    image: golang:1.25
+    image: golang:1.26
     # Resources are REQUIRED. Without them the step pod is QoS class BestEffort,
     # the first thing evicted under node memory pressure — and it dies during
     # `go: downloading`, producing a log with zero `=== RUN` lines that reads
